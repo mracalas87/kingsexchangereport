@@ -51,7 +51,8 @@
   .page .lab { font-weight: bold; color: var(--navy); width: 17%; }
   .page .val { width: 33%; }
   .page h4 { color: var(--navy); font-size: 13px; margin: 18px 0 7px; }
-  .page .txt { white-space: pre-wrap; line-height: 1.5; font-size: 11px; }
+  .page .txt { white-space: pre-wrap; overflow-wrap: anywhere; word-break: break-word; line-height: 1.5; font-size: 11px; }
+  .page td, .page th { overflow-wrap: anywhere; word-break: break-word; }
   .page table.vals th { background: var(--navy); color: #fff; font-size: 10.5px; text-align: center; padding: 12px 4px; border-color: var(--navy); }
   .page table.vals th:first-child, .page table.vals td:first-child { text-align: left; padding-left: 10px; }
   .page table.vals td { text-align: center; padding: 8px 4px; }
@@ -68,6 +69,10 @@
   .ftr .addr { font-size: 10.5px; color: #666; line-height: 1.5; max-width: 440px; }
   .ftr .addr b { color: #555; }
   .ftr .insp { font-size: 11px; color: var(--navy); }
+  /* One font everywhere (stops browser/system fallbacks differing between sections) */
+  body, button, input, textarea, h1, h2, label { font-family: Arial, Helvetica, sans-serif; }
+  .page, .page h3, .page h4, .page table, .page td, .page th, .page .txt, .page .lab, .page .val { font-family: Arial, Helvetica, sans-serif; letter-spacing: normal; font-kerning: normal; }
+  .page .sigtext { font-family: 'Segoe Script','Brush Script MT','Snell Roundhand','Lucida Handwriting',cursive; }
 </style>
 </head>
 <body>
@@ -188,6 +193,9 @@ $('pastoral').addEventListener('input', counts);
 $('summary').addEventListener('input', counts);
 counts();
 
+// Insert invisible break points into very long unbroken strings so the PDF renderer wraps them
+function soft(t) { return String(t).replace(/(\S{25})(?=\S)/g, '$1\u200b'); }
+
 function fmtDate(s) { const p = s.split('-'); return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : s; }
 
 
@@ -236,10 +244,10 @@ $('form').addEventListener('submit', async e => {
   if (errs.length) { $('err').textContent = errs.join('\n'); return; }
 
   // Fill the letterhead (textContent keeps user text safe)
-  ['name', 'year', 'period', 'tutor'].forEach(k => $('r_' + k).textContent = $(k).value.trim());
+  ['name', 'year', 'period', 'tutor'].forEach(k => $('r_' + k).textContent = soft($(k).value.trim()));
   $('r_date').textContent = fmtDate($('date').value);
-  $('r_pastoral').textContent = p;
-  $('r_summary').textContent = s;
+  $('r_pastoral').textContent = soft(p);
+  $('r_summary').textContent = soft(s);
   $('r_s3wrap').style.display = s ? 'block' : 'none';   // Section 3 is optional: hide when empty
   $('r_vals').innerHTML =
     '<tr><th>Value</th>' + LEVELS.map(l => '<th>' + l + '</th>').join('') + '</tr>' +
@@ -252,9 +260,9 @@ $('form').addEventListener('submit', async e => {
     const im = new Image(); im.className = 'sigimg'; im.src = pad.toDataURL('image/png');
     try { await im.decode(); } catch (_) {}
     sigBox.appendChild(im);
-    const n = document.createElement('div'); n.className = 'signame'; n.textContent = sigName; sigBox.appendChild(n);
+    const n = document.createElement('div'); n.className = 'signame'; n.textContent = soft(sigName); sigBox.appendChild(n);
   } else {
-    const t = document.createElement('div'); t.className = 'sigtext'; t.textContent = sigName; sigBox.appendChild(t);
+    const t = document.createElement('div'); t.className = 'sigtext'; t.textContent = soft(sigName); sigBox.appendChild(t);
   }
   $('r_sigdate').textContent = fmtDate($('date').value);
 
