@@ -73,6 +73,8 @@
   body, button, input, textarea, h1, h2, label { font-family: Arial, Helvetica, sans-serif; }
   .page, .page h3, .page h4, .page table, .page td, .page th, .page .txt, .page .lab, .page .val { font-family: Arial, Helvetica, sans-serif; letter-spacing: normal; font-kerning: normal; }
   .page .sigtext { font-family: 'Segoe Script','Brush Script MT','Snell Roundhand','Lucida Handwriting',cursive; }
+  /* Match on-screen text layout to the PDF renderer (fixes odd letter spacing on some systems) */
+  .page, .page * { text-rendering: geometricPrecision; -webkit-font-smoothing: antialiased; }
 </style>
 </head>
 <body>
